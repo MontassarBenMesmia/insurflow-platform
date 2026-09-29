@@ -1,0 +1,43 @@
+{
+  "realm": "insurflow",
+  "enabled": true,
+  "displayName": "InsurFlow",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      { "name": "customer", "description": "Can create and view insurance quotes" },
+      { "name": "admin", "description": "Can manage the quote portfolio" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "insurflow-web",
+      "name": "InsurFlow Angular application",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "http://localhost:4200",
+      "baseUrl": "http://localhost:4200",
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"]
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Customer",
+      "email": "demo@insurflow.local",
+      "credentials": [{ "type": "password", "value": "demo123", "temporary": false }],
+      "realmRoles": ["customer"]
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+name: insurflow
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-insurflow}
+      POSTGRES_USER: ${POSTGRES_USER:-insurflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-insurflow}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-insurflow} -d ${POSTGRES_DB:-insurflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.4
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:-insurflow}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-insurflow}
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./infra/keycloak/insurflow-realm.json:/opt/keycloak/data/import/insurflow-realm.json:ro
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  risk-service:
+    build: ./ml-service
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-insurflow}
+      DB_USERNAME: ${POSTGRES_USER:-insurflow}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-insurflow}
+      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/insurflow
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/insurflow/protocol/openid-connect/certs
+      RISK_SERVICE_URL: http://risk-service:8000
+      FRONTEND_ORIGIN: http://localhost:4200
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      risk-service:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+      - keycloak
+
+volumes:
+  postgres-data:

@@ -1,0 +1,42 @@
+<section class="hero page-shell">
+  <div class="hero-copy">
+    <span class="eyebrow">Secure · explainable · production-minded</span>
+    <h1>Insurance quotes, assessed in seconds.</h1>
+    <p>InsurFlow combines a secure customer workflow with an explainable risk model, giving teams a reviewable quote instead of a black-box decision.</p>
+    <div class="hero-actions">
+      <a class="button button-primary" routerLink="/workspace">Open quote workspace</a>
+      <a class="button button-ghost" href="#architecture">Explore architecture</a>
+    </div>
+    <div class="trust-row" aria-label="Platform highlights"><span>OIDC + PKCE</span><span>Validated REST API</span><span>Explainable ML</span></div>
+  </div>
+  <div class="score-card" aria-label="Example assessment">
+    <div class="score-card-top"><span>Risk assessment</span><span class="live-dot">Live</span></div>
+    <strong>0.24</strong><span class="risk-pill">Low risk</span>
+    <div class="meter"><span></span></div>
+    <dl>
+      <div><dt>Coverage</dt><dd>$85,000</dd></div>
+      <div><dt>Annual premium</dt><dd>$742</dd></div>
+      <div><dt>Decision</dt><dd>Assessed</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="metrics page-shell">
+  <article><strong>4</strong><span>isolated services</span></article>
+  <article><strong>3</strong><span>risk explanations</span></article>
+  <article><strong>100%</strong><span>containerized locally</span></article>
+</section>
+
+<section id="architecture" class="architecture page-shell">
+  <div>
+    <span class="eyebrow">System design</span>
+    <h2>A small platform with clear boundaries.</h2>
+    <p>Each component owns one responsibility and communicates through documented interfaces.</p>
+  </div>
+  <div class="architecture-grid">
+    <article><span>01</span><h3>Angular web</h3><p>Typed forms, responsive workflows, and token-aware API calls.</p></article>
+    <article><span>02</span><h3>Keycloak</h3><p>OIDC authentication with PKCE and role-based authorization.</p></article>
+    <article><span>03</span><h3>Spring API</h3><p>Validation, persistence, migrations, OpenAPI, and resilient orchestration.</p></article>
+    <article><span>04</span><h3>Python ML</h3><p>Versioned model training, bounded inputs, health checks, and explanations.</p></article>
+  </div>
+</section>

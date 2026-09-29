@@ -1,0 +1,28 @@
+.site-header {
+  align-items: center;
+  backdrop-filter: blur(18px);
+  background: rgba(247, 249, 246, 0.9);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: auto 1fr auto;
+  padding: 1rem clamp(1.25rem, 5vw, 5rem);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand { align-items: center; color: var(--ink); display: flex; font-family: var(--font-display); font-size: 1.2rem; font-weight: 750; gap: .7rem; text-decoration: none; }
+.brand-mark { align-items: center; background: var(--ink); border-radius: .7rem; color: var(--paper); display: inline-flex; height: 2.25rem; justify-content: center; letter-spacing: -.08em; width: 2.25rem; }
+nav { display: flex; gap: 1.5rem; }
+nav a { color: var(--muted); font-size: .9rem; font-weight: 650; text-decoration: none; }
+nav a.active, nav a:hover { color: var(--ink); }
+.auth-actions { align-items: center; display: flex; gap: 1rem; }
+.identity { color: var(--muted); font-size: .85rem; }
+main { min-height: calc(100vh - 10rem); }
+footer { border-top: 1px solid var(--line); color: var(--muted); display: flex; font-size: .85rem; justify-content: space-between; padding: 1.5rem clamp(1.25rem, 5vw, 5rem); }
+footer a { color: inherit; }
+@media (max-width: 760px) {
+  .site-header { gap: 1rem; grid-template-columns: 1fr auto; }
+  nav { grid-column: 1 / -1; grid-row: 2; }
+  .identity { display: none; }
+}

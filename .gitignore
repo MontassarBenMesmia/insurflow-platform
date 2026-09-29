@@ -1,0 +1,38 @@
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Java
+backend/target/
+*.log
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/public/favicon.ico
+
+# Python
+ml-service/.venv/
+ml-service/__pycache__/
+ml-service/.pytest_cache/
+ml-service/.coverage
+ml-service/htmlcov/
+ml-service/artifacts/*.joblib
+*.py[cod]
+
+# Local databases and generated data
+*.db
+*.mv.db
+*.trace.db

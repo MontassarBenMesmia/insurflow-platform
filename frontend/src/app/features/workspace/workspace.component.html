@@ -1,0 +1,50 @@
+<section class="workspace page-shell">
+  <div class="workspace-heading">
+    <div><span class="eyebrow">Protected workspace</span><h1>Quote operations</h1></div>
+    @if (auth.authenticated()) { <button class="button button-ghost" type="button" (click)="loadQuotes()">Refresh</button> }
+  </div>
+
+  @if (!auth.authenticated()) {
+    <article class="signed-out-card">
+      <span class="lock">↗</span><h2>Authentication required</h2>
+      <p>Sign in through the local Keycloak realm to access customer quote operations.</p>
+      <button class="button button-primary" type="button" (click)="auth.login()">Continue with Keycloak</button>
+      @if (!auth.identityAvailable()) { <small>Keycloak is currently unavailable. Start the Docker stack first.</small> }
+    </article>
+  } @else {
+    @if (error()) { <div class="error-banner" role="alert">{{ error() }}</div> }
+    <div class="workspace-grid">
+      <form class="quote-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="section-title"><span>New assessment</span><span>01</span></div>
+        <label>Customer name<input type="text" formControlName="customerName" /></label>
+        <div class="field-grid">
+          <label>Product<select formControlName="quoteType"><option value="AUTO">Auto</option><option value="HOME">Home</option><option value="TRAVEL">Travel</option></select></label>
+          <label>Applicant age<input type="number" formControlName="age" /></label>
+          <label>Annual income<input type="number" formControlName="annualIncome" /></label>
+          <label>Coverage amount<input type="number" formControlName="coverageAmount" /></label>
+          <label>Previous claims<input type="number" formControlName="previousClaims" /></label>
+          <label>Vehicle age<input type="number" formControlName="vehicleAge" /></label>
+        </div>
+        <button class="button button-primary submit" type="submit" [disabled]="saving()">{{ saving() ? 'Assessing…' : 'Create and assess quote' }}</button>
+      </form>
+
+      <section class="quote-list">
+        <div class="section-title"><span>Recent quotes</span><span>{{ quotes().length.toString().padStart(2, '0') }}</span></div>
+        @if (loading()) { <p class="empty-state">Loading quotes…</p> }
+        @else if (quotes().length === 0) { <p class="empty-state">No quotes yet. Submit the first assessment.</p> }
+        @else {
+          @for (quote of quotes(); track quote.id) {
+            <article class="quote-row">
+              <div class="quote-main"><span class="quote-type">{{ quote.quoteType }}</span><h3>{{ quote.customerName }}</h3><small>{{ quote.createdAt | date: 'medium' }}</small></div>
+              <div class="quote-risk">
+                @if (quote.riskScore !== null) { <strong>{{ quote.riskScore | number: '1.2-2' }}</strong><span [class]="'risk risk-' + quote.riskBand?.toLowerCase()">{{ quote.riskBand }}</span> }
+                @else { <strong>—</strong><span class="risk">Review</span> }
+              </div>
+              <div class="quote-premium"><small>Recommended premium</small><strong>{{ quote.recommendedPremium === null ? 'Pending' : (quote.recommendedPremium | currency: 'USD') }}</strong></div>
+            </article>
+          }
+        }
+      </section>
+    </div>
+  }
+</section>

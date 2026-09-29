@@ -1,0 +1,25 @@
+<header class="site-header">
+  <a class="brand" routerLink="/" aria-label="InsurFlow home">
+    <span class="brand-mark">IF</span>
+    <span>InsurFlow</span>
+  </a>
+  <nav aria-label="Primary navigation">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+    <a routerLink="/workspace" routerLinkActive="active">Quote workspace</a>
+  </nav>
+  <div class="auth-actions">
+    @if (auth.authenticated()) {
+      <span class="identity">{{ auth.username() }}</span>
+      <button class="button button-ghost" type="button" (click)="auth.logout()">Sign out</button>
+    } @else {
+      <button class="button button-primary" type="button" (click)="auth.login()">Sign in</button>
+    }
+  </div>
+</header>
+
+<main><router-outlet /></main>
+
+<footer>
+  <span>InsurFlow portfolio project</span>
+  <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noreferrer">API documentation</a>
+</footer>

@@ -22,8 +22,8 @@
       "directAccessGrantsEnabled": false,
       "rootUrl": "http://localhost:4200",
       "baseUrl": "http://localhost:4200",
-      "redirectUris": ["http://localhost:4200/*"],
-      "webOrigins": ["http://localhost:4200"],
+      "redirectUris": ["http://localhost:4200/*", "http://insurflow.local/*"],
+      "webOrigins": ["http://localhost:4200", "http://insurflow.local"],
       "attributes": { "pkce.code.challenge.method": "S256" },
       "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"]
     }

@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: insurflow
+
+resources:
+  - kubernetes/namespace.yaml
+  - kubernetes/postgres.yaml
+  - kubernetes/keycloak.yaml
+  - kubernetes/risk-service.yaml
+  - kubernetes/backend.yaml
+  - kubernetes/frontend.yaml
+  - kubernetes/ingress.yaml
+  - kubernetes/autoscaling.yaml
+  - kubernetes/observability.yaml
+
+configMapGenerator:
+  - name: insurflow-platform-config
+    literals:
+      - DB_URL=jdbc:postgresql://postgres:5432/insurflow
+      - KEYCLOAK_ISSUER_URI=http://insurflow.local/realms/insurflow
+      - KEYCLOAK_JWK_SET_URI=http://keycloak:8080/realms/insurflow/protocol/openid-connect/certs
+      - RISK_SERVICE_URL=http://risk-service:8000
+      - FRONTEND_ORIGIN=http://insurflow.local
+  - name: keycloak-realm
+    files:
+      - insurflow-realm.json=keycloak/insurflow-realm.json
+  - name: postgres-init
+    files:
+      - 01-create-keycloak.sql=postgres/init/01-create-keycloak.sql
+  - name: prometheus-config
+    files:
+      - prometheus.yml=observability/prometheus.yml
+  - name: grafana-datasource
+    files:
+      - prometheus.yml=observability/grafana/provisioning/datasources/prometheus.yml
+  - name: grafana-dashboard-provider
+    files:
+      - insurflow.yml=observability/grafana/provisioning/dashboards/insurflow.yml
+  - name: grafana-dashboard
+    files:
+      - insurflow-platform.json=observability/grafana/dashboards/insurflow-platform.json
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: insurflow
+    includeSelectors: true
+
+generatorOptions:
+  disableNameSuffixHash: false

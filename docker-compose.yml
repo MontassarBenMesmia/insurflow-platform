@@ -29,6 +29,8 @@ services:
       KC_DB_USERNAME: ${POSTGRES_USER:-insurflow}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-insurflow}
       KC_HEALTH_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME_STRICT: "false"
     volumes:
       - ./infra/keycloak/insurflow-realm.json:/opt/keycloak/data/import/insurflow-realm.json:ro
     ports:
@@ -53,7 +55,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-insurflow}
       DB_USERNAME: ${POSTGRES_USER:-insurflow}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-insurflow}
-      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/insurflow
+      KEYCLOAK_ISSUER_URI: http://localhost:4200/realms/insurflow
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/insurflow/protocol/openid-connect/certs
       RISK_SERVICE_URL: http://risk-service:8000
       FRONTEND_ORIGIN: http://localhost:4200
@@ -75,5 +77,39 @@ services:
       - backend
       - keycloak
 
+  prometheus:
+    image: prom/prometheus:v3.14.0
+    profiles: [observability]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=7d"]
+    volumes:
+      - ./infra/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      backend:
+        condition: service_started
+      risk-service:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:13.1.6
+    profiles: [observability]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-locally}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+    volumes:
+      - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
 volumes:
   postgres-data:
+  prometheus-data:
+  grafana-data:

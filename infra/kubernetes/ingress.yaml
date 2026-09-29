@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: insurflow
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 1m
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: insurflow.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service: {name: backend, port: {name: http}}
+          - path: /swagger-ui
+            pathType: Prefix
+            backend:
+              service: {name: backend, port: {name: http}}
+          - path: /v3/api-docs
+            pathType: Prefix
+            backend:
+              service: {name: backend, port: {name: http}}
+          - path: /realms
+            pathType: Prefix
+            backend:
+              service: {name: keycloak, port: {name: http}}
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service: {name: keycloak, port: {name: http}}
+          - path: /
+            pathType: Prefix
+            backend:
+              service: {name: frontend, port: {name: http}}

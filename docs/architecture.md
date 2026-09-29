@@ -32,6 +32,8 @@ sequenceDiagram
 | Spring Boot API | Validation, authorization, orchestration, persistence | Persists a pending-review quote if ML is unavailable |
 | Python risk service | Model training, prediction, explanation | Health endpoint reports model availability |
 | PostgreSQL | Durable quote and identity data | Containers wait for database readiness |
+| Prometheus | Scrapes bounded application and runtime metrics | Application traffic continues if monitoring is unavailable |
+| Grafana | Provisions a read-only platform dashboard | Queries Prometheus without application credentials |
 
 ## ML design
 
@@ -45,3 +47,9 @@ The demo model is trained from deterministic synthetic data during the image bui
 - API: stateless OAuth 2.0 resource server
 - CORS: restricted to the configured frontend origin
 - Secrets: environment-only; local demo values are explicitly non-production
+
+## Kubernetes operating model
+
+The cluster topology keeps the browser, API, identity provider, and risk service behind a single ingress host. PostgreSQL is stateful; the application workloads are replicated and stateless. Startup, readiness, and liveness probes prevent premature routing and restart unhealthy containers. CPU-based autoscaling applies to the Spring Boot and risk services, while Pod Disruption Budgets preserve one available replica during voluntary maintenance.
+
+Prometheus scrapes the internal service names and is not exposed by ingress. Grafana is also internal and can be accessed through an authenticated port-forward or placed behind an organization identity proxy. See the [operations guide](operations.md).

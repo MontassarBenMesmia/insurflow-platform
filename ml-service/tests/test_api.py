@@ -12,6 +12,14 @@ def test_health_reports_loaded_model():
     assert response.json() == {"status": "ok", "model_loaded": True}
 
 
+def test_metrics_expose_request_and_latency_series():
+    client.get("/health")
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert "risk_api_requests_total" in response.text
+    assert "risk_api_request_duration_seconds" in response.text
+
+
 def test_prediction_is_explainable_and_bounded():
     response = client.post(
         "/predict",

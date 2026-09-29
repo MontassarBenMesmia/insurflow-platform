@@ -21,6 +21,9 @@ This repository is a focused rebuild of the insurance quotation contribution I d
 - Graceful degradation: quotes remain reviewable if ML is unavailable
 - Responsive Angular interface with typed forms and token-aware requests
 - Docker Compose environment with health-aware startup ordering
+- Prometheus metrics with an automatically provisioned Grafana dashboard
+- Kubernetes deployment with probes, resource controls, autoscaling, and disruption budgets
+- Versioned container images published to GitHub Container Registry
 - OpenAPI/Swagger documentation and automated test suites
 - GitHub Actions CI and Dependabot configuration
 - No committed secrets, personal datasets, generated databases, or model binaries
@@ -34,6 +37,9 @@ flowchart LR
     API -->|validated features| ML[Python risk service<br/>:8000]
     API --> DB[(PostgreSQL<br/>:5432)]
     IAM --> DB
+    PROM[Prometheus] -->|scrape| API
+    PROM -->|scrape| ML
+    GRAF[Grafana] --> PROM
 ```
 
 See [the architecture guide](docs/architecture.md) for the request sequence, boundaries, failure behavior, and security model.
@@ -45,7 +51,8 @@ See [the architecture guide](docs/architecture.md) for the request sequence, bou
 | Web | Angular 22, TypeScript, SCSS, RxJS, Keycloak JS |
 | API | Java 17, Spring Boot, Spring Security, Spring Data JPA, Flyway, springdoc-openapi |
 | ML | Python 3.12, FastAPI, scikit-learn, NumPy, Pydantic |
-| Platform | PostgreSQL, Keycloak, Docker Compose, Nginx |
+| Platform | PostgreSQL, Keycloak, Docker Compose, Kubernetes, Kustomize, Nginx |
+| Observability | Prometheus, Micrometer, Grafana, provisioned dashboards |
 | Quality | JUnit 5, Mockito, Vitest, Pytest, GitHub Actions, Dependabot |
 
 ## Quick start
@@ -72,6 +79,12 @@ On Windows PowerShell, you can run:
 
 The first build downloads the Java, Node, Python, Keycloak, and PostgreSQL dependencies and may take several minutes.
 
+To include the monitoring stack:
+
+```bash
+docker compose --profile observability up --build
+```
+
 ### Local endpoints
 
 | Service | URL |
@@ -82,6 +95,8 @@ The first build downloads the Java, Node, Python, Keycloak, and PostgreSQL depen
 | ML documentation | http://localhost:8000/docs |
 | ML health | http://localhost:8000/health |
 | Keycloak administration | http://localhost:8081 |
+| Prometheus (observability profile) | http://localhost:9090 |
+| Grafana (observability profile) | http://localhost:3000 |
 
 ### Demo login
 
@@ -152,6 +167,12 @@ python -m pip install -r requirements-dev.txt
 pytest
 ```
 
+## Kubernetes deployment
+
+Production-style Kustomize resources cover the complete platform, health probes, resource requests and limits, Horizontal Pod Autoscalers, Pod Disruption Budgets, ingress routing, Prometheus, and Grafana. Secrets are deliberately excluded from the rendered configuration.
+
+See the [operations guide](docs/operations.md) for the deployment contract, local-cluster commands, observability workflow, and production adaptations.
+
 ## Repository structure
 
 ```text
@@ -161,7 +182,9 @@ insurflow-platform/
 ├── ml-service/              FastAPI risk scoring service
 ├── infra/
 │   ├── keycloak/            Importable realm, client, roles, and demo user
-│   └── postgres/            Local initialization scripts
+│   ├── kubernetes/           Workloads, ingress, probes, scaling, and resilience
+│   ├── observability/        Prometheus and provisioned Grafana dashboard
+│   └── postgres/             Local initialization scripts
 ├── docs/                    Architecture documentation
 ├── scripts/                 Developer utilities
 ├── .github/                 CI and dependency automation
@@ -175,6 +198,8 @@ insurflow-platform/
 - **Generated model artifact:** the binary model is built from source and excluded from Git, keeping the repository auditable and lightweight.
 - **External identity provider:** credentials and roles stay out of application code; the SPA uses the recommended browser PKCE flow.
 - **Pending-review fallback:** a temporary ML outage does not discard a valid quote request.
+- **One image, two operating targets:** Compose and Kubernetes run the same container builds and metric contracts.
+- **Observable by default:** both APIs expose Prometheus metrics, while the dashboard is provisioned from version-controlled JSON.
 
 ## Security
 

@@ -4,7 +4,10 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly keycloak = new Keycloak(environment.keycloak);
+  private readonly keycloak = new Keycloak({
+    ...environment.keycloak,
+    url: environment.keycloak.url || window.location.origin,
+  });
   readonly authenticated = signal(false);
   readonly username = signal('');
   readonly identityAvailable = signal(true);
